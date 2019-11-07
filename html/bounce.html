@@ -1,0 +1,187 @@
+<html>
+    <head>
+        <title>Bounce</title>
+
+        <script>
+        
+            var startTime;
+            var ball = {
+                x: 0,
+                y: 0,
+                color: rgba(0,0,0,1),
+                vx: 1,
+                vy: 1
+            };
+
+            var balls = [];
+
+            var container;
+
+            var updateInterval = null;
+
+            var updates = 0;
+
+            var ftpMeter;
+
+            function rgba(r,g,b,a) {
+                hr = "00" + r.toString(16);
+                hg = "00" + g.toString(16);
+                hb = "00" + b.toString(16);
+                ha = "00" + (a * 255).toString(16);
+                
+                return "#" + hr.substr(-2) + hg.substr(-2) + hb.substr(-2) + ha.substr(-2);
+            }
+
+            function changeDirection(ball) {
+
+                if ((ball.x - 5) <= container.offsetLeft) {
+                    ball.vx = 2 * Math.random();
+                }
+                if ((ball.y - 5) <= container.offsetTop) {
+                    ball.vy = 2 * Math.random();
+                } 
+
+                if ((ball.x + 5) >= container.offsetLeft + container.offsetWidth) {
+                    ball.vx = -2 * Math.random();
+                }
+                if ((ball.y + 5) >= container.offsetTop + container.offsetHeight) {
+                    ball.vy = -2 * Math.random();
+                }
+
+                return ball;
+            }
+
+            function updateBalls() {
+
+                for (var i = 0; i < balls.length; i++) {
+
+                    balls[i] = changeDirection(balls[i]);
+                    balls[i].x += balls[i].vx;
+                    balls[i].y += balls[i].vy;
+                    //console.log(balls[i].id + ":" + balls[i].element.id)
+                    balls[i].element.style.top = (balls[i].y - 5) + "px"
+                    balls[i].element.style.left = (balls[i].x -5) + "px"
+                    
+                }
+
+                updates++;
+                var now = new Date();
+                var fps = (updates / (now.getTime() - startTime) * 1000);
+                fpsMeter.textContent = fps.toFixed(2);
+                
+            }
+
+            function init() {
+
+                if (updateInterval != null) {
+                    clearInterval(updateInterval);
+                    updateInterval = null;
+                    for (var i = 0; i < balls.length; i++) {
+                        var ball = document.getElementById(balls[i].element.id);
+                        ball.remove(); 
+                    }
+                    balls = [];
+                }
+
+                var howManyBalls = document.getElementById("howManyBalls");
+                var count = howManyBalls.options[howManyBalls.selectedIndex].value;
+                container = document.getElementById("container");
+                fpsMeter = document.getElementById("fpsMeter");
+
+                for (var i = 0; i < parseInt(count); i++) {
+                    var b = Object.assign({}, ball);
+                    balls.push(b);
+                    balls[i].x = ((container.offsetWidth - container.offsetLeft) * Math.random()) + container.offsetLeft;
+                    balls[i].y = ((container.offsetHeight - container.offsetTop) * Math.random()) + container.offsetTop;
+                    balls[i].color = rgba(255 * Math.random(), 255 * Math.random(), 255 * Math.random(), Math.random());
+                    balls[i].vx = (Math.random() >= 0.5)? 1 : -1;
+                    balls[i].vy = (Math.random() >= 0.5)? 1 : -1;
+                    balls[i].id = "ball" + i;
+                    balls[i].element = document.createElement("div")
+                    balls[i].element.id = balls[i].id;
+                    balls[i].element.name = "ball";
+                    balls[i].element.className = "ball";
+                    balls[i].element.style.top = (balls[i].y - 5 + container.offsetTop) + "px";
+                    balls[i].element.style.left = (balls[i].x - 5 + container.offsetLeft) + "px";
+                    balls[i].element.style.backgroundColor = balls[i].color;
+                    balls[i].element.style.borderColor = balls[i].color;
+                    container.appendChild(balls[i].element);
+                }
+
+
+
+                var now = new Date();
+                startTime =  now.getTime();
+                updates = 0;
+
+                updateInterval = setInterval(updateBalls, 0);
+
+
+
+            }
+        
+        </script>
+
+        <style>
+            body {
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #container {
+                width: 100%;
+                height: 600px;
+                border: 1px solid grey;
+                box-sizing: border-box;
+            }
+
+            .ball {
+                border-radius: 50%;
+                border: 1px solid black;
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                box-sizing: border-box;
+            }
+        
+            #balls {
+                float: left;
+                width: 30%;
+            }
+            
+            #fpsMeter {
+                float: left;
+                width: 30%;
+            }
+
+            .clearfix::after {
+                content: "";
+                clear: both;
+                display: table;
+            }
+        </style>
+    </head>
+    <body onload="init()">
+        <div id="settings">
+            <div id="balls">Balls: 
+                <select id="howManyBalls" onchange="init()">
+                        <option value="1" default>1</option>
+                        <option value="10" default>10</option>
+                        <option value="25" default>25</option>
+                        <option value="50" default>50</option>
+                        <option value="100" default>100</option>
+                        <option value="250" default>250</option>
+                        <option value="500" default>500</option>
+                        <option value="1000" default>1000</option>
+\                </select>
+            </div>
+            <div id="fpsMeter"> 
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div id="container">
+
+        </div>
+    
+    </body>
+</html>

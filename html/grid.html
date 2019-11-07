@@ -1,0 +1,159 @@
+<html>
+    <head>
+        <title>Grid</title>
+
+        <script>
+        
+            var container;
+            var GRIDSIZE = 20;
+            var grid = [];
+
+            var gridWidth
+            var gridHeight
+
+            function resizeGrid() {
+
+                container.style.height = container.offsetWidth + "px";
+                cells = document.getElementsByClassName("cell");
+
+                var width = Math.ceil((container.clientWidth) / GRIDSIZE) + "px";
+
+                for (var i = 0; i < cells.length; i++) {
+                    cells[i].style.width = width;
+                    cells[i].style.height = width;
+                }
+                row = document.getElementById("row_0")
+                gridWidth = row.clientWidth
+
+                gridHeight = 0
+                rows = document.getElementsByClassName("row");
+                for (var i = 0; i < rows.length; i++) {
+                    gridHeight += rows[i].clientHeight
+                }
+
+                var yAxis = document.getElementById("yAxis")
+                yAxis.style.top = container.offsetTop;
+                yAxis.style.left = container.offsetLeft + Math.ceil(gridWidth / 2) - 1
+                yAxis.style.height = gridHeight
+                yAxis.style.width = "3px"
+
+                var xAxis = document.getElementById("xAxis")
+                xAxis.style.top = container.offsetTop + Math.ceil(gridHeight / 2) - 1 
+                xAxis.style.left = container.offsetLeft
+                xAxis.style.height = "3px"
+                xAxis.style.width = gridWidth
+
+                
+            }
+
+            function rgba(r,g,b,a) {
+                hr = "00" + r.toString(16);
+                hg = "00" + g.toString(16);
+                hb = "00" + b.toString(16);
+                ha = "00" + (a * 255).toString(16);
+                
+                return "#" + hr.substr(-2) + hg.substr(-2) + hb.substr(-2) + ha.substr(-2);
+            }
+
+            
+
+            function init() {
+
+                container = document.getElementById("container");
+                container.innerHTML = "";
+
+                var width = Math.ceil((container.clientWidth) / GRIDSIZE) + "px";
+
+                for (var row = 0; row < GRIDSIZE; row++) {
+                    var rowElement = document.createElement("div")
+                    rowElement.id = "row_" + row
+                    rowElement.className = "row clearfix"
+                    var rowArray = new Array(GRIDSIZE)
+                    for (var col = 0 ; col < GRIDSIZE; col++) {
+                        var cell = document.createElement("div");
+                        cell.id = "cell_" + row + "_" + col;
+                        cell.className = "cell";
+                        cell.name = "cell";
+                        cell.style.width = width;
+                        cell.style.height = width;
+                        rowElement.appendChild(cell)
+                    }
+                    container.appendChild(rowElement)
+                }
+
+
+                var yAxis = document.createElement("div")
+                yAxis.id = "yAxis"
+                yAxis.className = "line"
+                yAxis.name = "axis"
+                yAxis.style.top = container.offsetTop;
+                yAxis.style.left = (container.offsetWidth - 3) + "px"
+                yAxis.style.height = container.offsetHeight - container.offsetTop;
+                yAxis.style.width = "3px"
+                container.appendChild(yAxis)
+
+                var xAxis = document.createElement("div")
+                xAxis.id = "xAxis"
+                xAxis.className = "line"
+                xAxis.name = "axis"
+                xAxis.style.top = (container.offsetHeight / 2) - 3 + container.offsetTop;
+                xAxis.style.left = container.offsetLeft
+                xAxis.style.height = "3px"
+                xAxis.style.width = container.offsetWidth - container.offsetTop
+                container.appendChild(xAxis)
+
+                resizeGrid();
+                window.addEventListener('resize', resizeGrid);
+
+                
+
+            }
+        
+        </script>
+
+        <style>
+            body {
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #container {
+                margin: 20px 25%;
+                width: auto;
+                border: none;
+                box-sizing: border-box;
+            }
+
+            .cell {
+                margin-left: -1;
+                margin-top: -1;
+                box-sizing: border-box;
+                border: 1px solid grey;
+                float: left;
+            }
+
+            .row {
+                box-sizing: border-box;
+                display: inline-block;
+                white-space: nowrap;
+            }
+
+            .line {
+                position: absolute;
+                background-color: black;
+            }
+            .clearfix::after {
+                content: "";
+                clear: both;
+                display: table;
+            }
+
+        </style>
+    </head>
+    <body onload="init()">
+        <div id="container">
+
+        </div>
+    
+    </body>
+</html>

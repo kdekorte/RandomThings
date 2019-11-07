@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <title>Triangle</title>
+
+        <script>
+        
+            var container;
+
+            function rgba(r,g,b,a) {
+                hr = "00" + r.toString(16);
+                hg = "00" + g.toString(16);
+                hb = "00" + b.toString(16);
+                ha = "00" + (a * 255).toString(16);
+                
+                return "#" + hr.substr(-2) + hg.substr(-2) + hb.substr(-2) + ha.substr(-2);
+            }
+
+            function resize() {
+                var width = (container.offsetWidth)  + "px";
+                container.innerHTML = ""
+                container.style.top = 0
+                container.style.height = width
+                container.className = "white"
+                container.style.borderBottomWidth = width;
+                container.style.borderBottomColor = "transparent"
+                createTriangle(container)
+
+            }
+
+            function createTriangle(parent) {
+                var bottom = parseInt(parent.style.borderBottomWidth) / ( 2 * .866);
+                if (bottom < 3) {
+                    return
+                }
+
+                triangle = document.createElement("div")
+                if (parent.className.indexOf("white") >= 0) {
+                    triangle.className = "triangle"
+                    triangle.style.borderBottomColor = rgba(70, 130, 180, 1)
+                } else {
+                    triangle.className = "triangle white"
+                    triangle.style.borderBottomColor = rgba(200, 200, 200, 1)
+                }
+                triangle.style.borderBottomWidth = parseInt(bottom) + "px"
+                triangle.style.borderLeftWidth = (parseInt(bottom) * 0.866 ) + "px"
+                triangle.style.borderRightWidth = (parseInt(bottom) * 0.866 ) + "px"
+                triangle.style.height = (bottom / 2) + "px"
+                triangle.style.top = ((bottom/2) + parseInt(parent.style.height)) + "px"
+                triangle.style.left = parent.offsetLeft + "px"
+                parent.appendChild(triangle)
+                createTriangle(triangle)
+
+            }
+
+
+            function init() {
+
+                container = document.getElementById("container");
+                resize();
+                window.addEventListener('resize', resize);
+
+
+
+
+
+
+            }
+        
+        </script>
+
+        <style>
+            body {
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #container {
+                height: 20px;
+                margin: 10px 20%;
+                border: 1px solid grey;
+                box-sizing: border-box;
+                position:relative;
+            }
+
+            .triangle {
+                position: fixed;
+                width: 0px;
+                height: 0px;
+                box-sizing: content-box;
+                border-left: 1px solid transparent;
+                border-right: 1px solid transparent;
+                border-bottom: 1px solid black;
+            }
+        
+ 
+        </style>
+    </head>
+    <body onload="init()">
+
+        <div id="container">
+
+        </div>
+    
+    </body>
+</html>

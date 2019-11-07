@@ -1,0 +1,304 @@
+<html>
+    <head>
+        <title>Breakout</title>
+
+        <script>
+        
+            var startTime;
+            var ball = {
+                x: 0,
+                y: 0,
+                color: rgba(0,0,0,1),
+                vx: 1,
+                vy: 1
+            };
+
+            var balls = [];
+
+            var GRIDROWS = 5;
+            var GRIDCOLS = 21;
+            var blocks = [];
+            var paddle = {};
+
+            var container;
+
+            var updateInterval = null;
+
+            var updates = 0;
+
+            var ftpMeter;
+
+            function rgba(r,g,b,a) {
+                hr = "00" + r.toString(16);
+                hg = "00" + g.toString(16);
+                hb = "00" + b.toString(16);
+                ha = "00" + (a * 255).toString(16);
+                
+                return "#" + hr.substr(-2) + hg.substr(-2) + hb.substr(-2) + ha.substr(-2);
+            }
+
+            function resizeGrid() {
+
+                container.style.height = container.offsetWidth + "px";
+                var blocks = document.getElementsByClassName("block");
+
+                var width = (container.offsetWidth - 2) / GRIDCOLS + "px";
+                var height = ((container.offsetWidth - 2) / GRIDCOLS) / 2 + "px";
+
+                for (var i = 0; i < blocks.length; i++) {
+                    blocks[i].style.width = width;
+                    blocks[i].style.height = height;
+                }
+
+
+            }
+
+            function changeDirection(ball) {
+
+                if ((ball.x - 5) <= container.offsetLeft) {
+                    ball.vx = Math.abs(ball.vx)
+                }
+                if ((ball.y - 5) <= container.offsetTop) {
+                    ball.vy = Math.abs(ball.vy)
+                } 
+
+                if ((ball.x + 5) >= container.offsetLeft + container.offsetWidth) {
+                    ball.vx = -Math.abs(ball.vx)
+                }
+                if ((ball.y + 5) >= container.offsetTop + container.offsetHeight) {
+                    ball.vy = -Math.abs(ball.vy)
+                }
+
+                return ball;
+            }
+
+            function checkBlocks(ball) {
+
+                var blocks = document.getElementsByClassName("block");
+                for (var i = 0; i < blocks.length; i++) {
+                    var block = blocks[i]
+
+                    // coming from left
+                    if ((ball.x + 5) >= block.offsetLeft 
+                        && (ball.x + 5) <= (block.offsetLeft + 5) 
+                        && ball.y + 5 >= block.offsetTop 
+                        && ball.y - 5 <= block.offsetTop + block.offsetHeight
+                        && ball.vx > 0) {
+                        ball.vx = -Math.abs(ball.vx)
+                        continue;
+                    }
+
+                    // coming from right
+                    if ((ball.x - 5) <= (block.offsetLeft + block.offsetWidth) 
+                        && (ball.x - 5) >= (block.offsetLeft + block.offsetWidth - 5)
+                        && ball.y + 5 >= block.offsetTop 
+                        && ball.y - 5 <= block.offsetTop + block.offsetHeight
+                        && ball.vx < 0) {
+                        ball.vx = Math.abs(ball.vx)
+                        continue
+                    }
+
+                    // coming from top
+                    if ((ball.y + 5) >= block.top
+                        && ball.y + 5 <= (block.offsetTop + block.offsetHeight + 5)
+                        && ball.x + 5 >= block.offsetLeft 
+                        && ball.x - 5 <= block.offsetLeft + block.offsetWidth
+                        && ball.vy > 0) {
+                        ball.vy = -Math.abs(ball.vy)
+                        continue
+                    }
+
+                    // coming from bottom
+                    if ((ball.y - 5) <= (block.offsetTop + block.offsetHeight)
+                        && ball.y - 5 >= (block.offsetTop + block.offsetHeight - 5)
+                        && ball.x + 5 >= block.offsetLeft 
+                        && ball.x - 5 <= block.offsetLeft + block.offsetWidth
+                        && ball.vy < 0) {
+                        ball.vy = Math.abs(ball.vy)
+                        continue
+                    }
+
+                }
+                
+
+
+                return ball
+            }
+
+            function updateBalls() {
+
+                for (var i = 0; i < balls.length; i++) {
+
+                    balls[i] = changeDirection(balls[i]);
+                    balls[i] = checkBlocks(balls[i]);
+                    balls[i].x += balls[i].vx;
+                    balls[i].y += balls[i].vy;
+                    //console.log(balls[i].id + ":" + balls[i].element.id)
+                    balls[i].element.style.top = (balls[i].y - 5) + "px"
+                    balls[i].element.style.left = (balls[i].x -5) + "px"
+                    
+                }
+
+                updates++;
+                var now = new Date();
+                var fps = (updates / (now.getTime() - startTime) * 1000);
+                fpsMeter.textContent = fps.toFixed(2);
+                
+            }
+
+            function init() {
+
+                if (updateInterval != null) {
+                    clearInterval(updateInterval);
+                    updateInterval = null;
+                    for (var i = 0; i < balls.length; i++) {
+                        var ball = document.getElementById(balls[i].element.id);
+                        ball.remove(); 
+                    }
+                    balls = [];
+                    barriers = [];
+                }
+
+                var howManyBalls = document.getElementById("howManyBalls");
+                var count = howManyBalls.options[howManyBalls.selectedIndex].value;
+                container = document.getElementById("container");
+                container.innerHTML = "";
+                fpsMeter = document.getElementById("fpsMeter");
+
+                for (var i = 0; i < parseInt(count); i++) {
+                    var b = Object.assign({}, ball);
+                    balls.push(b);
+                    balls[i].x = (container.offsetWidth + container.offsetLeft) / 2
+                    balls[i].y = (container.offsetHeight + container.offsetTop) / 2
+                    balls[i].color = rgba(70, 130, 180, 1)
+                    balls[i].vx = (Math.random() >= 0.5)? 1 : -1;
+                    balls[i].vy = (Math.random() >= 0.5)? 1 : -1;
+                    balls[i].id = "ball" + i;
+                    balls[i].element = document.createElement("div")
+                    balls[i].element.id = balls[i].id;
+                    balls[i].element.name = "ball";
+                    balls[i].element.className = "ball";
+                    balls[i].element.style.top = (balls[i].y - 5 + container.offsetTop) + "px";
+                    balls[i].element.style.left = (balls[i].x - 5 + container.offsetLeft) + "px";
+                    balls[i].element.style.backgroundColor = balls[i].color;
+                    balls[i].element.style.borderColor = balls[i].color;
+                    container.appendChild(balls[i].element);
+                }
+
+                var width = (container.offsetWidth) / GRIDCOLS + "px";
+                var height = ((container.offsetWidth) / GRIDCOLS) / 2 + "px";
+
+               
+                for (var row = 0; row < GRIDROWS; row++) {
+                    var rowElement = document.createElement("div")
+                    rowElement.className = "row clearfix" + (row == 0?" first":"")
+                    
+                    for (var col = 0; col < GRIDCOLS; col++) {
+                        var block = document.createElement("div");
+                        block.id = "block_" + row + "_" + col;
+                        block.className = "block";
+                        block.name = "block";
+                        block.style.width = width;
+                        block.style.height = height;
+                        rowElement.appendChild(block)
+                        
+                    }
+                    container.appendChild(rowElement)
+                }
+
+
+
+                
+
+
+                var now = new Date();
+                startTime =  now.getTime();
+                updates = 0;
+
+                resizeGrid();
+                window.addEventListener('resize', resizeGrid);
+
+                updateInterval = setInterval(updateBalls, 0);
+
+
+
+            }
+        
+        </script>
+
+        <style>
+            body {
+                box-sizing: border-box;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #container {
+                margin: 10px 25%;
+                border: 1px solid grey;
+                box-sizing: border-box;
+                background-color: black;
+            }
+
+            .row.first {
+                padding-top: 50px;
+            }
+
+            .ball {
+                border-radius: 50%;
+                border: 1px solid black;
+                position: absolute;
+                width: 10px;
+                height: 10px;
+                box-sizing: border-box;
+            }
+
+            .block {
+                
+                box-sizing: border-box;
+                border: 1px solid lightgray;
+                float: left;
+                background-color: steelblue;
+            }
+
+
+            .block.hit {
+                border: 1px solid transparent;
+                position: absolute;
+                box-sizing: border-box;
+                background-color: transparent;
+            }
+        
+            #balls {
+                float: left;
+                width: 30%;
+            }
+            
+            #fpsMeter {
+                float: left;
+                width: 30%;
+            }
+
+            .clearfix::after {
+                content: "";
+                clear: both;
+                display: table;
+            }
+        </style>
+    </head>
+    <body onload="init()">
+        <div id="settings">
+            <div id="balls">Balls: 
+                <select id="howManyBalls" onchange="init()">
+                        <option value="1" default>1</option>
+                </select>
+            </div>
+            <div id="fpsMeter"> 
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div id="container">
+
+        </div>
+    
+    </body>
+</html>
